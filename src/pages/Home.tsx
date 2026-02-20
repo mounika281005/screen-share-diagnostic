@@ -5,28 +5,40 @@ import PageWrapper from "../components/PageWrapper";
 export default function Home() {
   const navigate = useNavigate();
 
+  const isSecureContext =
+    typeof window !== "undefined" &&
+    (window.isSecureContext ||
+      window.location.hostname === "localhost");
+
   const isSupported =
     typeof navigator !== "undefined" &&
     navigator.mediaDevices &&
-    "getDisplayMedia" in navigator.mediaDevices;
+    typeof navigator.mediaDevices.getDisplayMedia === "function";
+
+  const canUseScreenShare = isSecureContext && isSupported;
+
+  const handleStart = () => {
+    if (!canUseScreenShare) return;
+    navigate("/screen-test");
+  };
 
   return (
     <PageWrapper>
       <div className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
 
-        {/* Soft Spotlight Background */}
+        {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100"></div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-100 opacity-30 blur-3xl rounded-full"></div>
 
         <div className="relative z-10 w-full max-w-5xl">
 
-          {/* Hero */}
+          {/* Hero Section */}
           <div className="text-center mb-20">
 
             <h1 className="text-5xl font-semibold text-gray-900 mb-6 leading-tight">
               Screen Share
               <span className="block text-blue-600">
-                Diagnostic Platform
+                Test App
               </span>
             </h1>
 
@@ -38,16 +50,18 @@ export default function Home() {
 
             <div className="flex justify-center">
               <Button
-                onClick={() => navigate("/screen-test")}
-                disabled={!isSupported}
+                onClick={handleStart}
+                disabled={!canUseScreenShare}
               >
-                Launch Screen Test
+                Start Screen Test
               </Button>
             </div>
 
-            {!isSupported && (
+            {/* Unsupported Message */}
+            {!canUseScreenShare && (
               <div className="mt-6 border border-red-200 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg max-w-md mx-auto">
-                Screen capture API unavailable. Use HTTPS or localhost.
+                Screen capture API is not available in this environment.
+                Please use a secure HTTPS connection or localhost in a supported browser (Chrome / Edge).
               </div>
             )}
 
@@ -61,7 +75,7 @@ export default function Home() {
                 Permission Intelligence
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Precise handling of granted, denied, cancelled, and error states
+                Explicit handling of granted, denied, cancelled, and error states
                 using native browser APIs.
               </p>
             </div>
