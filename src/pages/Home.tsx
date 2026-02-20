@@ -5,20 +5,14 @@ import PageWrapper from "../components/PageWrapper";
 export default function Home() {
   const navigate = useNavigate();
 
-  const isSecureContext =
-    typeof window !== "undefined" &&
-    (window.isSecureContext ||
-      window.location.hostname === "localhost");
-
+  // Strict spec requirement check
   const isSupported =
     typeof navigator !== "undefined" &&
     navigator.mediaDevices &&
     typeof navigator.mediaDevices.getDisplayMedia === "function";
 
-  const canUseScreenShare = isSecureContext && isSupported;
-
   const handleStart = () => {
-    if (!canUseScreenShare) return;
+    if (!isSupported) return;
     navigate("/screen-test");
   };
 
@@ -51,17 +45,15 @@ export default function Home() {
             <div className="flex justify-center">
               <Button
                 onClick={handleStart}
-                disabled={!canUseScreenShare}
+                disabled={!isSupported}
               >
                 Start Screen Test
               </Button>
             </div>
 
-            {/* Unsupported Message */}
-            {!canUseScreenShare && (
+            {!isSupported && (
               <div className="mt-6 border border-red-200 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg max-w-md mx-auto">
-                Screen capture API is not available in this environment.
-                Please use a secure HTTPS connection or localhost in a supported browser (Chrome / Edge).
+                Screen sharing is not supported in this browser.
               </div>
             )}
 
@@ -75,8 +67,7 @@ export default function Home() {
                 Permission Intelligence
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Explicit handling of granted, denied, cancelled, and error states
-                using native browser APIs.
+                Explicit handling of granted, denied, cancelled, and error states.
               </p>
             </div>
 
@@ -85,8 +76,7 @@ export default function Home() {
                 Stream Lifecycle Control
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Detects manual termination and unexpected stream endings with
-                guaranteed resource cleanup.
+                Detects manual termination and unexpected stream endings.
               </p>
             </div>
 
@@ -95,8 +85,7 @@ export default function Home() {
                 Real-Time Diagnostics
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Live display of resolution, frame rate, display surface,
-                and session duration metrics.
+                Live display of resolution, frame rate, display surface and duration.
               </p>
             </div>
 
