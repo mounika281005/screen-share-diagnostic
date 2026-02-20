@@ -9,20 +9,23 @@ export default function ScreenTest() {
   const { status, start, stop, videoRef, metadata, duration } =
     useScreenShare();
 
+  const isRequesting = status === "requesting";
+  const isGranted = status === "granted";
+
   return (
     <PageWrapper>
       <div className="min-h-screen flex items-center justify-center px-6">
-        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-10">
+        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-20">
+          <div className="flex items-center justify-between mb-10">
             <h1 className="text-2xl font-semibold text-gray-900">
               Screen Share Session
             </h1>
             <StatusBadge status={status} />
           </div>
 
-          {/* Idle */}
+          {/* ---------------- Idle ---------------- */}
           {status === "idle" && (
             <div className="flex justify-center">
               <Button onClick={start}>
@@ -31,19 +34,19 @@ export default function ScreenTest() {
             </div>
           )}
 
-          {/* Requesting */}
-          {status === "requesting" && (
+          {/* ---------------- Requesting ---------------- */}
+          {isRequesting && (
             <div className="text-center text-yellow-600 animate-pulse">
               Waiting for screen selection...
             </div>
           )}
 
-          {/* Granted */}
-          {status === "granted" && (
-            <div className="space-y-8">
+          {/* ---------------- Granted ---------------- */}
+          {isGranted && (
+            <div className="space-y-6">
 
               {/* Video Preview */}
-              <div className="border border-gray-200 rounded-xl overflow-hidden shadow-md animate-scaleFadeIn">
+              <div className="border border-gray-200 rounded-xl overflow-hidden shadow-md">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -52,33 +55,34 @@ export default function ScreenTest() {
                 />
               </div>
 
-              {/* Diagnostic Cards */}
+              {/* Metadata Cards */}
               <div className="grid md:grid-cols-2 gap-6 text-sm">
 
                 {/* Stream Metadata */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
                   <p className="font-semibold text-blue-700 mb-2">
                     Stream Metadata
                   </p>
-                  <p className="text-blue-900">
-                    Resolution: {metadata?.width} x {metadata?.height}
+                  <p>
+                    Resolution: {metadata?.width ?? "-"} x{" "}
+                    {metadata?.height ?? "-"}
                   </p>
-                  <p className="text-blue-900">
-                    Frame Rate: {metadata?.frameRate}
+                  <p>
+                    Frame Rate: {metadata?.frameRate ?? "-"}
                   </p>
-                  <p className="text-blue-900">
-                    Display Surface: {metadata?.displaySurface}
+                  <p>
+                    Display Surface:{" "}
+                    {metadata?.displaySurface ?? "Unavailable"}
                   </p>
                 </div>
 
                 {/* Session Info */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="bg-green-50 border border-green-200 rounded-xl p-5">
                   <p className="font-semibold text-green-700 mb-2">
                     Session Info
                   </p>
 
-                  {/* Active Indicator */}
-                  <div className="flex items-center gap-2 text-green-900 mb-2">
+                  <div className="flex items-center gap-2 mb-2">
                     <span className="relative flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
@@ -86,9 +90,7 @@ export default function ScreenTest() {
                     <span>Active</span>
                   </div>
 
-                  <p className="text-green-900">
-                    Duration: {duration}s
-                  </p>
+                  <p>Duration: {duration}s</p>
                 </div>
 
               </div>
@@ -103,14 +105,14 @@ export default function ScreenTest() {
             </div>
           )}
 
-          {/* End / Error States */}
+          {/* ---------------- End / Error States ---------------- */}
           {(status === "denied" ||
             status === "cancelled" ||
             status === "error" ||
             status === "stopped") && (
             <div className="space-y-6 text-center">
 
-              <div className="bg-gray-100 border border-gray-300 rounded-xl p-6 shadow-sm">
+              <div className="bg-gray-100 border border-gray-300 rounded-xl p-6">
 
                 {status === "denied" && (
                   <p className="text-red-600">
@@ -132,7 +134,7 @@ export default function ScreenTest() {
 
                 {status === "stopped" && (
                   <p className="text-gray-700">
-                    Screen sharing session ended.
+                    Screen sharing stopped.
                   </p>
                 )}
 
@@ -140,7 +142,7 @@ export default function ScreenTest() {
 
               <div className="flex justify-center gap-4">
                 <Button onClick={start}>
-                  Retry
+                  Retry Screen Test
                 </Button>
                 <Button variant="secondary" onClick={() => navigate("/")}>
                   Back to Home

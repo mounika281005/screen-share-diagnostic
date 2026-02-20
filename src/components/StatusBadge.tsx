@@ -1,4 +1,3 @@
-
 export type Status =
   | "idle"
   | "requesting"
@@ -14,7 +13,7 @@ interface Props {
 
 export default function StatusBadge({ status }: Props) {
   const base =
-    "px-3 py-1 text-xs font-medium rounded-full border transition-all duration-300 ease-in-out";
+    "px-3 py-1 text-xs font-medium rounded-full border transition-all duration-300";
 
   const config: Record<
     Status,
@@ -26,23 +25,23 @@ export default function StatusBadge({ status }: Props) {
     },
     requesting: {
       label: "Requesting Permission",
-      styles: "bg-yellow-50 border-yellow-300 text-yellow-600",
+      styles: "bg-yellow-50 border-yellow-300 text-yellow-700",
     },
     granted: {
       label: "Active",
-      styles: "bg-green-50 border-green-300 text-green-600",
+      styles: "bg-green-50 border-green-300 text-green-700",
     },
     denied: {
       label: "Permission Denied",
-      styles: "bg-red-50 border-red-300 text-red-600",
+      styles: "bg-red-50 border-red-300 text-red-700",
     },
     cancelled: {
       label: "Selection Cancelled",
-      styles: "bg-orange-50 border-orange-300 text-orange-600",
+      styles: "bg-orange-50 border-orange-300 text-orange-700",
     },
     error: {
       label: "Error",
-      styles: "bg-red-100 border-red-400 text-red-700",
+      styles: "bg-red-100 border-red-400 text-red-800",
     },
     stopped: {
       label: "Stopped",
@@ -52,9 +51,5 @@ export default function StatusBadge({ status }: Props) {
 
   const { label, styles } = config[status];
 
-  return (
-    <span className={`${base} ${styles}`}>
-      {label}
-    </span>
-  );
+  return <span className={`${base} ${styles}`}>{label}</span>;
 }

@@ -19,11 +19,11 @@ export default function Button({
 
   const variants: Record<Variant, string> = {
     primary:
-      "bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5",
+      "bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:shadow-md",
     secondary:
-      "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:shadow-md hover:-translate-y-0.5",
+      "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:shadow-md",
     danger:
-      "bg-red-600 border-red-600 text-white hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5",
+      "bg-red-600 border-red-600 text-white hover:bg-red-700 hover:shadow-md",
   };
 
   return (

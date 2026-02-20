@@ -5,11 +5,10 @@ import PageWrapper from "../components/PageWrapper";
 export default function Home() {
   const navigate = useNavigate();
 
-  // Strict spec requirement check
+  // Strict and safe API support check
   const isSupported =
     typeof navigator !== "undefined" &&
-    navigator.mediaDevices &&
-    typeof navigator.mediaDevices.getDisplayMedia === "function";
+    typeof navigator.mediaDevices?.getDisplayMedia === "function";
 
   const handleStart = () => {
     if (!isSupported) return;
@@ -20,9 +19,11 @@ export default function Home() {
     <PageWrapper>
       <div className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
 
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-100 opacity-30 blur-3xl rounded-full"></div>
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100"></div>
+
+        {/* Soft Spotlight */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-200 opacity-20 blur-3xl rounded-full"></div>
 
         <div className="relative z-10 w-full max-w-5xl">
 
@@ -38,7 +39,7 @@ export default function Home() {
 
             <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed mb-10">
               A browser-native validation tool engineered to test permission handling,
-              stream lifecycle management, and real-time metadata diagnostics
+              media stream lifecycle integrity, and real-time metadata diagnostics
               using native Web APIs.
             </p>
 
@@ -53,7 +54,8 @@ export default function Home() {
 
             {!isSupported && (
               <div className="mt-6 border border-red-200 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg max-w-md mx-auto">
-                Screen sharing is not supported in this browser.
+                Screen capture API unavailable in this browser.
+                Please use Chrome or Edge on HTTPS or localhost.
               </div>
             )}
 
@@ -67,7 +69,8 @@ export default function Home() {
                 Permission Intelligence
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Explicit handling of granted, denied, cancelled, and error states.
+                Precise differentiation between granted, denied, cancelled,
+                and unexpected error states for complete transparency.
               </p>
             </div>
 
@@ -76,7 +79,8 @@ export default function Home() {
                 Stream Lifecycle Control
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Detects manual termination and unexpected stream endings.
+                Detects manual termination and unexpected stream endings
+                using event-driven lifecycle management.
               </p>
             </div>
 
@@ -85,7 +89,8 @@ export default function Home() {
                 Real-Time Diagnostics
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Live display of resolution, frame rate, display surface and duration.
+                Live display of resolution, frame rate, display surface,
+                and session duration extracted from track settings.
               </p>
             </div>
 

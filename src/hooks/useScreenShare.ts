@@ -24,12 +24,14 @@ export function useScreenShare() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const intervalRef = useRef<number | null>(null);
 
-  // ----------------------------
-  // Stop Stream Safely
-  // ----------------------------
-  const stop = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => {
+  // --------------------------------
+  // Cleanup helper
+  // --------------------------------
+  const cleanup = useCallback((targetStream?: MediaStream | null) => {
+    const activeStream = targetStream ?? stream;
+
+    if (activeStream) {
+      activeStream.getTracks().forEach((track) => {
         try {
           track.stop();
         } catch {}
@@ -44,15 +46,21 @@ export function useScreenShare() {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+  }, [stream]);
 
+  // --------------------------------
+  // Stop
+  // --------------------------------
+  const stop = useCallback(() => {
+    cleanup(stream);
     setStream(null);
     setDuration(0);
     setStatus("stopped");
-  }, [stream]);
+  }, [cleanup, stream]);
 
-  // ----------------------------
-  // Start Screen Share
-  // ----------------------------
+  // --------------------------------
+  // Start
+  // --------------------------------
   const start = useCallback(async () => {
     if (status === "requesting") return;
 
@@ -64,10 +72,8 @@ export function useScreenShare() {
         audio: false,
       });
 
-      // Prevent stream reuse
-      if (stream) {
-        stream.getTracks().forEach((t) => t.stop());
-      }
+      // Ensure old stream is cleared
+      cleanup(stream);
 
       setStream(mediaStream);
       setStatus("granted");
@@ -82,46 +88,49 @@ export function useScreenShare() {
       const track = mediaStream.getVideoTracks()[0];
       if (track) {
         track.onended = () => {
-          stop();
+          cleanup(mediaStream);
+          setStream(null);
+          setDuration(0);
+          setStatus("stopped");
         };
       }
-    } catch (error: any) {
-      if (error?.name === "NotAllowedError") {
-        setStatus("denied");
-      } else if (error?.name === "AbortError") {
-        setStatus("cancelled");
+
+    } catch (err: unknown) {
+      if (err instanceof DOMException) {
+        if (err.name === "NotAllowedError") {
+          setStatus("denied");
+        } else if (err.name === "AbortError") {
+          setStatus("cancelled");
+        } else {
+          setStatus("error");
+        }
       } else {
         setStatus("error");
       }
     }
-  }, [status, stream, stop]);
+  }, [status, stream, cleanup]);
 
-  // ----------------------------
-  // Attach Stream to Video
-  // ----------------------------
+  // --------------------------------
+  // Attach stream to video
+  // --------------------------------
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
     }
   }, [stream]);
 
-  // ----------------------------
-  // Cleanup on Unmount
-  // ----------------------------
+  // --------------------------------
+  // Cleanup on unmount
+  // --------------------------------
   useEffect(() => {
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((t) => t.stop());
-      }
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      cleanup(stream);
     };
-  }, [stream]);
+  }, [cleanup, stream]);
 
-  // ----------------------------
-  // Extract Metadata
-  // ----------------------------
+  // --------------------------------
+  // Metadata extraction
+  // --------------------------------
   const metadata: Metadata | null = useMemo(() => {
     if (!stream) return null;
 
