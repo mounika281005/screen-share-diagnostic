@@ -1,177 +1,150 @@
-# Screen Share Diagnostic Platform
+# Screen Share Test App
 
-A browser-native screen sharing validation tool built using React (Vite) and Tailwind CSS.
+A browser-native screen sharing validation tool built using React (Vite) and TypeScript.
 
-This application demonstrates robust handling of browser screen-sharing permissions, media stream lifecycle management, real-time metadata extraction, and proper resource cleanup using native Web APIs.
+This application demonstrates robust permission handling, media stream lifecycle management, real-time metadata diagnostics, and clean React state management using native browser Web APIs.
 
 ---
 
 ## 🚀 Live Demo
 
-(Insert deployed link here)
+https://screen-share-diagnostic.vercel.app/
 
 ---
 
-## 📂 GitHub Repository
-
-(Insert repository link here)
-
----
-
-## 🧰 Tech Stack
+## Tech Stack
 
 - React (Vite)
 - TypeScript
 - Tailwind CSS
 - React Router
-- Native Browser Web APIs (`getDisplayMedia`)
+- Native Web APIs (`navigator.mediaDevices.getDisplayMedia`)
 
 No third-party screen-sharing libraries are used.
 
 ---
 
-## 🎯 Objective
+# Explanation of Screen-Sharing Flow
 
-This project was built to demonstrate:
+The screen-sharing lifecycle follows a structured state-driven approach.
 
-- Browser permission handling
-- Explicit UI state transitions
-- Media stream lifecycle detection
-- Real-time diagnostics
-- Clean React state management
-- Proper cleanup of media resources
-- Responsive, polished UI
+###  Homepage Validation
 
----
+Before navigation to the screen test page:
 
-## 🧠 Architecture Overview
+- The app verifies:
+  
+  ```js
+  navigator.mediaDevices.getDisplayMedia
+  ```
 
-### 1️⃣ Custom Hook — `useScreenShare`
-
-All screen-sharing logic is isolated inside a reusable custom hook.
-
-Responsibilities:
-
-- Requesting screen capture via `navigator.mediaDevices.getDisplayMedia`
-- Managing permission states
-- Attaching stream to `<video>`
-- Extracting metadata using `track.getSettings()`
-- Tracking live session duration
-- Detecting manual stream termination using `track.onended`
-- Cleaning up media tracks and intervals
-- Preventing stream reuse
-
-This ensures UI components remain stateless and focused purely on presentation.
+- If unsupported:
+  - Navigation is blocked
+  - A browser-unsupported message is shown
 
 ---
 
-### 2️⃣ State Machine
+### Permission Request
 
-The application explicitly handles the following states:
+When the user clicks **Start Screen Sharing**, the app calls:
 
-- `idle`
-- `requesting`
-- `granted`
-- `denied`
-- `cancelled`
-- `error`
-- `stopped`
+```js
+navigator.mediaDevices.getDisplayMedia({
+  video: { frameRate: { ideal: 30 } },
+  audio: false
+})
+```
 
-Each state maps to clear and distinct UI feedback.
+The UI reflects distinct states:
 
-No generic error handling.
+- `requesting` – Waiting for user selection
+- `granted` – Screen stream active
+- `denied` – Permission rejected
+- `cancelled` – User closed picker
+- `error` – Unexpected failure
 
----
-
-### 3️⃣ Media Lifecycle Handling
-
-The app detects:
-
-- Manual stop via browser UI
-- Unexpected stream termination
-- User cancellation
-- Permission denial
-
-Cleanup guarantees:
-
-- All tracks are stopped
-- Intervals are cleared
-- Video element is detached
-- No memory leaks
+Each state renders a specific UI message.
 
 ---
 
-## 🔄 Screen Sharing Flow
+### Live Preview & Metadata
 
-1. User clicks **Start Screen Sharing**
-2. `getDisplayMedia()` is triggered
-3. State transitions to `requesting`
-4. On success → `granted`
-5. Stream attaches to `<video>`
-6. Metadata extracted via `track.getSettings()`
-7. Duration counter starts
-8. If user stops from browser:
-   - `track.onended` triggers
-   - Cleanup executes
-   - Status becomes `stopped`
+Once granted:
 
----
+- The stream attaches to a `<video>` element using:
 
-## 📊 Features
+  ```js
+  videoRef.current.srcObject = stream;
+  ```
 
-### ✅ Permission Handling
-Distinct UI handling for:
-- Permission granted
-- Permission denied
-- Picker cancelled
-- Unknown error
+- Metadata is extracted using:
 
-### ✅ Live Preview
-- Displays screen locally in `<video>`
-- No recording
-- No backend streaming
+  ```js
+  track.getSettings()
+  ```
 
-### ✅ Real-Time Diagnostics
-Displays:
+Displayed information:
+
 - Resolution
 - Frame rate
 - Display surface (monitor / window / tab)
 - Live session duration
 
-### ✅ UX Enhancements
-- Animated page transitions
-- Micro-interaction buttons
-- Smooth status transitions
-- Active session indicator
-- Clean responsive layout
+No recording or backend streaming occurs.
+Preview is strictly local.
 
 ---
 
-## 🌐 Browser Support
+### Lifecycle Detection
 
-Tested on:
+The app listens for manual stop events using:
 
-- Google Chrome
-- Microsoft Edge
+```js
+track.onended
+```
 
-Requires:
+If the user stops sharing from browser UI:
 
-- HTTPS environment OR
-- `localhost`
+- UI updates immediately
+- All media tracks are stopped
+- Video element is cleared
+- Duration timer is cleared
+- Status transitions to `stopped`
 
-Screen sharing will not function over insecure HTTP network IP addresses.
+This prevents memory leaks and stale streams.
 
 ---
 
-## 🛠 Setup Instructions
+### Retry Flow
 
-Install dependencies:
+After stopping:
+
+- User sees:
+  - "Screen sharing stopped"
+  - Retry Screen Test button
+  - Back to Home button
+
+Retry always triggers a fresh `getDisplayMedia()` request.
+Old streams are never reused.
+
+---
+
+# Setup Instructions
+
+### Clone the repository
+
+```bash
+git clone https://github.com/mounika281005/screen-share-diagnostic.git
+cd screen-share-diagnostic
+```
+
+### Install dependencies
 
 ```bash
 npm install
-````
+```
 
-Run development server:
+### Start development server
 
 ```bash
 npm run dev
@@ -185,51 +158,63 @@ http://localhost:5173
 
 ---
 
-## 📁 Project Structure
+# Screenshots
 
-```
-src/
-  components/
-    Button.tsx
-    StatusBadge.tsx
-    PageWrapper.tsx
-  hooks/
-    useScreenShare.ts
-  pages/
-    Home.tsx
-    ScreenTest.tsx
-  App.tsx
-  main.tsx
-  index.css
-```
+###  Home Page
 
----
-
-## ⚠️ Known Limitations
-
-* `displaySurface` support may vary across browsers.
-* Screen capture requires secure context.
-* No recording or backend persistence (local preview only).
-
----
-
-## 📷 Screenshots
-
-### 🏠 Home Page
 ![Home Page](./screenshots/home.png)
 
 ---
 
-### 🖥 Active Screen Sharing Session
+### Active Screen Sharing Session
+
 ![Active Session](./screenshots/active-session.png)
 
 ---
 
-### 🚫 Permission Denied State
+### Permission Denied State
+
 ![Permission Denied](./screenshots/permission-denied.png)
 
 ---
 
-## 👩‍💻 Author
+# Known Limitations & Browser Quirks
+
+- Screen sharing requires:
+  - HTTPS OR
+  - `localhost`
+
+- `displaySurface` support may vary between browsers.
+
+- Screen sharing is not supported on most mobile browsers.
+
+- Some browsers may label permission denial and cancellation differently.
+
+- The app does not record or store media data — preview only.
+
+---
+
+# Browser Support
+
+Tested on:
+
+- Google Chrome (Latest)
+- Microsoft Edge (Latest)
+
+---
+
+# Architectural Highlights
+
+- Screen-sharing logic isolated in custom hook: `useScreenShare`
+- Event-driven lifecycle detection using `track.onended`
+- Defensive cleanup to prevent memory leaks
+- Strict TypeScript typing
+- Stateless UI components
+- Reusable Button component
+- No UI libraries or templates
+
+---
+
+## Author
 
 Mounika Karri
